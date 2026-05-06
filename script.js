@@ -981,55 +981,69 @@ function checkCollisions() {
   const pz = 0; // player always at Z=0
 
   // ── Coins ──
-  for (const coin of R.getCoins()) {
-    if (!coin.userData.alive) continue;
-    const dz = Math.abs(coin.position.z - pz);
-    if (dz > 2.5) continue;
-    if (coin.userData.lane !== GS.lane) continue;
-    if (dz < 1.8) {
+for (const coin of R.getCoins()) {
 
+  if (!coin.userData.alive) continue;
+
+  const dz = Math.abs(coin.position.z - pz);
+
+  if (dz > 2.5) continue;
+
+  // 🧲 MAGNET PICKUP
   if (coin.userData.type === 'magnet') {
 
-    GS.magnet = true;
-    GS.magnetTimer = 600;
+    if (coin.userData.lane !== GS.lane) continue;
 
-    UI.showFeedback('🧲 MAGNET', 1);
+    if (dz < 1.8) {
+
+      GS.magnet = true;
+      GS.magnetTimer = 600;
+
+      UI.showFeedback('🧲 MAGNET', 1);
+
+      R.removeCoin(coin);
+
+      continue;
+    }
+  }
+
+  // 🪙 NORMAL COINS
+  if (coin.userData.lane !== GS.lane) continue;
+
+  if (dz < 1.8) {
+
+    coin.userData.alive = false;
+
+    R.burst(
+      coin.position.x,
+      coin.position.y,
+      coin.position.z,
+      0xffe600,
+      10
+    );
 
     R.removeCoin(coin);
 
-    continue;
+    GS.score += 10;
+
+    GS.combo++;
+
+    GS.comboTimer = 180;
+
+    Audio.play('coin');
+
+    UI.showFeedback(
+      GS.combo >= 10
+        ? '🔥 PERFECT!'
+        : GS.combo >= 5
+        ? '⚡ GREAT!'
+        : null,
+      GS.combo
+    );
+
+    UI.animateScore();
   }
-
-  coin.userData.alive = false;
-
-  R.burst(
-    coin.position.x,
-    coin.position.y,
-    coin.position.z,
-    0xffe600,
-    10
-  );
-
-  R.removeCoin(coin);
-
-  GS.score += 10;
-  GS.combo++;
-  GS.comboTimer = 180;
-
-  Audio.play('coin');
-
-  UI.showFeedback(
-    GS.combo >= 10
-      ? '🔥 PERFECT!'
-      : GS.combo >= 5
-      ? '⚡ GREAT!'
-      : null,
-    GS.combo
-  );
-
-  UI.animateScore();
 }
-  }
 
   // ── Obstacles ──
   if (GS.invFrames > 0) return;
