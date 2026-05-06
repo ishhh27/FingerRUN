@@ -575,7 +575,26 @@ function spawnCoins() {
         obstacles.splice(i, 1);
       }
     }
+   // Coins + Magnets
+for (let i = coins.length - 1; i >= 0; i--) {
 
+  const coin = coins[i];
+
+  coin.position.z += mz;
+
+  coin.rotation.y += 0.08;
+
+  if (coin.userData.type === 'magnet') {
+    coin.rotation.x += 0.05;
+  }
+
+  if (coin.position.z > C.CULL_Z) {
+
+    scene.remove(coin);
+
+    coins.splice(i, 1);
+  }
+}
     // Particles
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
