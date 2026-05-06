@@ -555,17 +555,70 @@ const coin = new THREE.Mesh(
       }
     }
 
-    // Coins
-    for (let i = coins.length - 1; i >= 0; i--) {
-      const c = coins[i];
-      c.position.z += mz;
-      c.rotation.y += 0.07;
-      c.position.y = 0.85 + Math.sin(gs.frame * 0.09 + i) * 0.12;
-      if (c.position.z > C.CULL_Z) {
-        scene.remove(c);
-        coins.splice(i, 1);
-      }
+    // ── Coins ──
+for (const coin of R.getCoins()) {
+
+  if (!coin.userData.alive) continue;
+
+  const dz = Math.abs(coin.position.z - pz);
+
+  if (dz > 2.5) continue;
+
+  if (coin.userData.lane !== GS.lane) continue;
+
+  if (dz < 1.8) {
+
+    // 🧲 Magnet
+    if (coin.userData.type === 'magnet') {
+
+      GS.magnet = true;
+
+      GS.magnetTimer = 600;
+
+      coin.userData.alive = false;
+
+      UI.showFeedback('🧲 MAGNET', 1);
+
+      Audio.play('coin');
+
+      R.removeCoin(coin);
+
+      continue;
     }
+
+    // 🪙 Normal Coin
+    coin.userData.alive = false;
+
+    R.burst(
+      coin.position.x,
+      coin.position.y,
+      coin.position.z,
+      0xffe600,
+      10
+    );
+
+    R.removeCoin(coin);
+
+    GS.score += 10;
+
+    GS.combo++;
+
+    GS.comboTimer = 180;
+
+    Audio.play('coin');
+
+    UI.showFeedback(
+      GS.combo >= 10
+        ? '🔥 PERFECT!'
+        : GS.combo >= 5
+        ? '⚡ GREAT!'
+        : null,
+      GS.combo
+    );
+
+    UI.animateScore();
+  }
+}
 
     // Particles
     for (let i = particles.length - 1; i >= 0; i--) {
