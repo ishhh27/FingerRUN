@@ -439,17 +439,19 @@ playerGroup.add(aura);
 
    magnet.rotation.z = Math.PI / 2;
 
-   magnet.position.set(
-     C.LANES[Math.floor(Math.random() * 3)],
-     1,
-     C.SPAWN_Z
-   );
+   const lane = Math.floor(Math.random() * 3);
 
-   magnet.userData = {
-     type: 'magnet',
-     lane: 1,
-     alive: true
-   };
+magnet.position.set(
+  C.LANES[lane],
+  1,
+  C.SPAWN_Z
+);
+
+magnet.userData = {
+  type: 'magnet',
+  lane: lane,
+  alive: true
+};
 
    scene.add(magnet);
    coins.push(magnet);
