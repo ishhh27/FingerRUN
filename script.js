@@ -457,41 +457,59 @@ magnet.userData = {
    coins.push(magnet);
   }
   // ── Coin factory ──
-  function spawnCoins() {
-    const lane = Math.floor(Math.random() * 3);
-    const n = Math.floor(Math.random() * 5) + 1;
-    for (let i = 0; i < n; i++) {
-      const coinMaterial = new THREE.MeshStandardMaterial({
+function spawnCoins() {
 
-  color:
-    GS.distance >= 1500 ? 0xaa00ff :
-    GS.distance >= 1000 ? 0x00aaff :
-    GS.distance >= 500 ? 0xff4444 :
-    0xffe600,
+  const lane = Math.floor(Math.random() * 3);
 
-  emissive:
-    GS.distance >= 1500 ? 0xaa00ff :
-    GS.distance >= 1000 ? 0x0088ff :
-    GS.distance >= 500 ? 0xff2222 :
-    0xffcc00,
+  const n = Math.floor(Math.random() * 5) + 1;
 
-  emissiveIntensity: 1.5,
+  for (let i = 0; i < n; i++) {
 
-  roughness: 0.25,
+    let coinColor = 0xffe600;
+    let emissiveColor = 0xffcc00;
 
-  metalness: 0.8
-});
+    if (GS.distance >= 1500) {
+      coinColor = 0xaa00ff;
+      emissiveColor = 0xaa00ff;
 
-const coin = new THREE.Mesh(
-  new THREE.OctahedronGeometry(0.21, 0),
-  coinMaterial
-);
-      coin.position.set(C.LANES[lane], 0.85, C.SPAWN_Z - i * 2.8);
-      coin.userData = { lane, alive: true };
-      scene.add(coin);
-      coins.push(coin);
+    } else if (GS.distance >= 1000) {
+      coinColor = 0x00aaff;
+      emissiveColor = 0x0088ff;
+
+    } else if (GS.distance >= 500) {
+      coinColor = 0xff4444;
+      emissiveColor = 0xff2222;
     }
+
+    const coinMaterial = new THREE.MeshStandardMaterial({
+      color: coinColor,
+      emissive: emissiveColor,
+      emissiveIntensity: 1.5,
+      roughness: 0.25,
+      metalness: 0.8
+    });
+
+    const coin = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.21, 0),
+      coinMaterial
+    );
+
+    coin.position.set(
+      C.LANES[lane],
+      0.85,
+      C.SPAWN_Z - i * 2.8
+    );
+
+    coin.userData = {
+      lane,
+      alive: true
+    };
+
+    scene.add(coin);
+
+    coins.push(coin);
   }
+}
 
   // ── Particle burst ──
   function burst(x, y, z, color = 0xffe600, n = 10) {
