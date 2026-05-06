@@ -1006,7 +1006,7 @@ function checkCollisions() {
 
     R.removeCoin(coin);
 
-    return;
+    continue;
   }
 
   coin.userData.alive = false;
