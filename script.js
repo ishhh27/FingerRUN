@@ -467,17 +467,18 @@ magnet.userData = {
     GS.distance >= 1500 ? 0xaa00ff :
     GS.distance >= 1000 ? 0x00aaff :
     GS.distance >= 500 ? 0xff4444 :
-                         0xffe600,
+    0xffe600,
 
   emissive:
     GS.distance >= 1500 ? 0xaa00ff :
     GS.distance >= 1000 ? 0x0088ff :
     GS.distance >= 500 ? 0xff2222 :
-                         0xffcc00,
+    0xffcc00,
 
   emissiveIntensity: 1.5,
 
   roughness: 0.25,
+
   metalness: 0.8
 });
 
