@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>fingerRUN — Gesture Endless Runner</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;600;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+
+  <!-- Three.js r128 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- MediaPipe Hands -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     LOADING SCREEN
+═══════════════════════════════════════════ -->
+<div id="screen-loading">
+  <div class="loading-inner">
+    <div class="brand-logo loading-logo">
+      <span class="brand-finger">finger</span><span class="brand-run">RUN</span>
+    </div>
+    <div class="loading-bar-wrap">
+      <div class="loading-bar" id="loading-bar"></div>
+    </div>
+    <div class="loading-status" id="loading-status">Initializing…</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     START SCREEN
+═══════════════════════════════════════════ -->
+<div id="screen-start" class="hidden">
+  <div class="start-inner">
+
+    <div class="brand-logo start-logo">
+      <span class="brand-finger">finger</span><span class="brand-run">RUN</span>
+    </div>
+    <p class="tagline">Control with your hand. No touching required.</p>
+
+    <!-- Live cam preview on start screen -->
+    <div class="start-cam-wrap">
+      <video id="video-preview" autoplay muted playsinline></video>
+      <canvas id="canvas-preview"></canvas>
+      <div class="cam-zones">
+        <div class="zone zone-left"><span>LEFT</span></div>
+        <div class="zone zone-center"><span>CENTER</span></div>
+        <div class="zone zone-right"><span>RIGHT</span></div>
+      </div>
+      <div class="cam-label">📷 HAND TRACKING LIVE</div>
+    </div>
+
+    <div class="control-guide">
+      <div class="ctrl"><div class="ctrl-icon">👈</div><div class="ctrl-desc">Hand <b>LEFT</b><br/>Move Left</div></div>
+      <div class="ctrl"><div class="ctrl-icon">🖐</div><div class="ctrl-desc">Hand <b>CENTER</b><br/>Stay Middle</div></div>
+      <div class="ctrl"><div class="ctrl-icon">👉</div><div class="ctrl-desc">Hand <b>RIGHT</b><br/>Move Right</div></div>
+      <div class="ctrl"><div class="ctrl-icon">⬆️</div><div class="ctrl-desc">Hand <b>UP</b><br/>Jump</div></div>
+    </div>
+
+    <button id="btn-start" class="btn-primary">
+      <span class="btn-shine"></span>
+      START RUNNING
+    </button>
+
+    <div class="hs-display">BEST &nbsp;<span id="hs-val">0</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     COUNTDOWN
+═══════════════════════════════════════════ -->
+<div id="screen-countdown" class="hidden">
+  <div class="countdown-num" id="countdown-num">3</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     GAME
+═══════════════════════════════════════════ -->
+<div id="screen-game" class="hidden">
+
+  <!-- Three.js canvas -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- ── HUD ── -->
+  <div id="hud">
+    <div class="hud-block">
+      <div class="hud-label">SCORE</div>
+      <div class="hud-val" id="hud-score">0</div>
+    </div>
+    <div class="hud-block hud-center-block">
+      <div id="combo-text"></div>
+      <div id="feedback-text"></div>
+    </div>
+    <div class="hud-block hud-right">
+      <div class="hud-label">DIST</div>
+      <div class="hud-val" id="hud-dist">0m</div>
+    </div>
+  </div>
+
+  <!-- ── GESTURE CAM (in-game) ── -->
+  <div id="cam-panel">
+    <div class="cam-title">✋ fingerRUN</div>
+    <div class="cam-view">
+      <video id="video-game" autoplay muted playsinline></video>
+      <canvas id="canvas-game"></canvas>
+      <!-- Zone indicators on cam -->
+      <div class="cam-zone-bar">
+        <div class="cz cz-left" id="cz-left"></div>
+        <div class="cz cz-mid"  id="cz-mid"></div>
+        <div class="cz cz-right" id="cz-right"></div>
+      </div>
+    </div>
+    <div class="cam-state" id="cam-state">Detecting…</div>
+  </div>
+
+  <!-- ── Keyboard hint ── -->
+  <div id="kb-hint">← ↑ → / A W D</div>
+
+  <!-- ── Screen vignette / effects ── -->
+  <div id="vignette"></div>
+  <div id="flash-overlay"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     GAME OVER
+═══════════════════════════════════════════ -->
+<div id="screen-gameover" class="hidden">
+  <div class="go-inner">
+    <div class="go-title" data-txt="GAME OVER">GAME OVER</div>
+
+    <div class="go-stats">
+      <div class="go-stat">
+        <div class="go-stat-label">SCORE</div>
+        <div class="go-stat-val" id="go-score">0</div>
+      </div>
+      <div class="go-stat">
+        <div class="go-stat-label">DISTANCE</div>
+        <div class="go-stat-val" id="go-dist">0m</div>
+      </div>
+      <div class="go-stat go-stat-hs">
+        <div class="go-stat-label">BEST</div>
+        <div class="go-stat-val" id="go-hs">0</div>
+      </div>
+    </div>
+
+    <div class="go-msg" id="go-msg">Keep going!</div>
+
+    <div class="go-btns">
+      <button class="btn-primary" id="btn-replay">▶ PLAY AGAIN</button>
+      <button class="btn-secondary" id="btn-menu">⌂ MENU</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+<audio id="bgm" loop>
+  <source src="space.mp3" type="audio/mpeg">
+</audio>
+</body>
+</html>
