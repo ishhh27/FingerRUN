@@ -26,8 +26,8 @@ const C = {
   LAND_SQUASH:        0.62,    // scale.y when landing
 
   // Speed
-  SPEED_START:        0.10,
-  SPEED_MAX:          0.2,
+  SPEED_START:        0.05,
+  SPEED_MAX:          0.1,
   SPEED_ACCEL:        0.000010, // per frame at 60fps
 
   // Lane transitions
